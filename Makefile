@@ -1,28 +1,29 @@
 # サーバー起動
-# make server-up
-.PHONY: server-up
-server-up:
+# make up
+.PHONY: up
+up:
 	docker compose up
 
 # サーバー停止
-# make server-stop
-.PHONY: server-stop
-server-stop:
+# make stop
+.PHONY: stop
+stop:
 	docker compose stop
 
 # サーバー削除
-# make server-down
-.PHONY: server-down
-server-down:
+# make down
+.PHONY: down
+down:
 	docker compose down
 
 # サーバー再起動
-# make server-restart
-.PHONY: server-restart
-server-restart:
+# make restart
+.PHONY: restart
+restart:
 	docker compose restart
 
 # コンテナに入る
-.PHONY: server-enter
-server-enter:
+# make enter
+.PHONY: enter
+enter:
 	docker compose run --rm api bash
