@@ -6,7 +6,14 @@ Rails.application.routes.draw do
   # users#indexは、users_controllerのindexアクション
   get "/users" => "users#index"
   get "/posts" => "posts#index"
+  get "/posts/:id" => "posts#show"
   post "/posts" => "posts#create"
+  
+  # お気に入り関連のルート
+  get "/favorites" => "favorites#index"
+  post "/favorites" => "favorites#create"
+  delete "/favorites" => "favorites#destroy"
+  get "/favorites/check" => "favorites#check"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

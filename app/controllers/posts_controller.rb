@@ -3,22 +3,59 @@ class PostsController < ApplicationController
 
   # GET /posts
   def index
-    @posts = Post.all
+    @posts = Post.includes(:tags)
 
-    render json: @posts
+    posts_data = @posts.map do |post|
+      Rails.logger.info "Post #{post.id}: images.attached? = #{post.images.attached?}, count = #{post.images.count}"
+      images = if post.images.attached?
+        post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) }
+      else
+        []
+      end
+      Rails.logger.info "Post #{post.id}: images = #{images}"
+
+      {
+        id: post.id,
+        user_id: post.user_id,
+        title: post.title,
+        price: post.price,
+        description: post.description,
+        season: post.season,
+        tags: post.tags.pluck(:name),
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        images: images
+      }
+    end
+
+    render json: posts_data
   end
 
   # GET /posts/1
   def show
-    render json: @post
+    render json: @post.as_json.merge(
+      images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
+      tags: @post.tags.pluck(:name)
+    )
   end
 
   # POST /posts
   def create
-    @post = Post.new(post_params)
-
+    @post = Post.new(post_params.except(:tags))
+    
     if @post.save
-      render json: @post, status: :created
+      # タグを個別に作成（重複を避ける）
+      if params[:post][:tags].present?
+        unique_tags = params[:post][:tags].uniq.reject(&:blank?).map(&:strip)
+        unique_tags.each do |tag_name|
+          @post.tags.find_or_create_by(name: tag_name) if tag_name.present?
+        end
+      end
+      
+      render json: @post.as_json.merge(
+        images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
+        tags: @post.tags.pluck(:name)
+      ), status: :created
     else
       render json: @post.errors, status: :unprocessable_entity
     end
@@ -26,8 +63,22 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1
   def update
-    if @post.update(post_params)
-      render json: @post
+    if @post.update(post_params.except(:tags))
+      # 既存のタグを削除
+      @post.tags.destroy_all
+      
+      # 新しいタグを作成（重複を避ける）
+      if params[:post][:tags].present?
+        unique_tags = params[:post][:tags].uniq.reject(&:blank?).map(&:strip)
+        unique_tags.each do |tag_name|
+          @post.tags.find_or_create_by(name: tag_name) if tag_name.present?
+        end
+      end
+      
+      render json: @post.as_json.merge(
+        images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
+        tags: @post.tags.pluck(:name)
+      )
     else
       render json: @post.errors, status: :unprocessable_entity
     end
@@ -46,6 +97,6 @@ class PostsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def post_params
-      params.expect(post: [ :user_id, :title, :price, :description, :season ])
+      params.expect(post: [ :user_id, :title, :price, :description, :season, :tags, images: [] ])
     end
 end
