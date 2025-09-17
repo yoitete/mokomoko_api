@@ -27,3 +27,13 @@ restart:
 .PHONY: enter
 enter:
 	docker compose run --rm api bash
+
+# rubocopを実行(自動修正なし)
+.PHONY: rubocop
+rubocop:
+	docker compose run --rm api bundle exec rubocop
+
+# rubocopを使って自動修正
+.PHONY: rubocop-fix
+rubocop-fix:
+	docker compose run --rm api bundle exec rubocop -A

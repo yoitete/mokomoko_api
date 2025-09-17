@@ -5,10 +5,11 @@ Rails.application.routes.draw do
   # resources :users
   # users#indexは、users_controllerのindexアクション
   get "/users" => "users#index"
+  post "/users" => "users#create"
   get "/posts" => "posts#index"
   get "/posts/:id" => "posts#show"
   post "/posts" => "posts#create"
-  
+
   # お気に入り関連のルート
   get "/favorites" => "favorites#index"
   post "/favorites" => "favorites#create"
