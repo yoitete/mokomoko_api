@@ -45,7 +45,7 @@ class FavoritesController < ApplicationController
 
   def set_favorite
     @favorite = Favorite.find_by(
-      user_id: params[:user_id],
+      user_id: @current_user.id,
       post_id: params[:post_id]
     )
   end
