@@ -6,6 +6,10 @@ Rails.application.routes.draw do
   # users#indexは、users_controllerのindexアクション
   get "/users" => "users#index"
   post "/users" => "users#create"
+  get "/users/:id" => "users#show"
+  get "/users/by_firebase_uid/:firebase_uid" => "users#show_by_firebase_uid"
+  put "/users/:id" => "users#update"
+  patch "/users/:id" => "users#update"
   get "/posts" => "posts#index"
   get "/posts/:id" => "posts#show"
   post "/posts" => "posts#create"
