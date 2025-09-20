@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_20_174300) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_20_174302) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -57,6 +57,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_20_174300) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_posts_on_user_id"
+  end
+
+  create_table "seasonal_campaigns", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.text "subtitle"
+    t.string "color_theme", default: "red"
+    t.integer "start_month", null: false
+    t.integer "end_month", null: false
+    t.string "link_path", null: false
+    t.string "button_text", default: "詳しくはこちら →"
+    t.text "highlight_text"
+    t.string "highlight_color"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "campaign_type", default: "primary", null: false
+    t.index ["active"], name: "index_seasonal_campaigns_on_active"
+    t.index ["campaign_type", "active"], name: "index_seasonal_campaigns_on_campaign_type_and_active"
+    t.index ["campaign_type"], name: "index_seasonal_campaigns_on_campaign_type"
+    t.index ["start_month", "end_month"], name: "index_seasonal_campaigns_on_start_month_and_end_month"
   end
 
   create_table "tags", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

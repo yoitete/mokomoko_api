@@ -19,6 +19,17 @@ Rails.application.routes.draw do
   post "/favorites" => "favorites#create"
   delete "/favorites" => "favorites#destroy"
   get "/favorites/check" => "favorites#check"
+  
+  # 季節特集関連のルート
+  get "/seasonal_campaigns/current" => "seasonal_campaigns#current"
+  get "/seasonal_campaigns/current_secondary" => "seasonal_campaigns#current_secondary"
+  get "/seasonal_campaigns/for_month/:month" => "seasonal_campaigns#for_month"
+  get "/seasonal_campaigns" => "seasonal_campaigns#index"
+  get "/seasonal_campaigns/:id" => "seasonal_campaigns#show"
+  post "/seasonal_campaigns" => "seasonal_campaigns#create"
+  put "/seasonal_campaigns/:id" => "seasonal_campaigns#update"
+  patch "/seasonal_campaigns/:id" => "seasonal_campaigns#update"
+  delete "/seasonal_campaigns/:id" => "seasonal_campaigns#destroy"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
