@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   put "/users/:id" => "users#update"
   patch "/users/:id" => "users#update"
   get "/posts" => "posts#index"
+  get "/posts/popular" => "posts#popular"
   get "/posts/:id" => "posts#show"
   post "/posts" => "posts#create"
 

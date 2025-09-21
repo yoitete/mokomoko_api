@@ -1,10 +1,20 @@
 class PostsController < ApplicationController
   before_action :set_post, only: %i[ show update destroy ]
-  skip_before_action :authenticate_user, only: [ :index, :show ]
+  skip_before_action :authenticate_user, only: [ :index, :show, :popular ]
 
   # GET /posts
   def index
     @posts = Post.includes(:tags)
+    
+    # ソートパラメータに応じて並び替え
+    case params[:sort]
+    when 'popular'
+      @posts = @posts.popular
+    when 'newest'
+      @posts = @posts.order(created_at: :desc)
+    else
+      @posts = @posts.order(created_at: :desc) # デフォルトは新着順
+    end
 
     posts_data = @posts.map do |post|
       Rails.logger.info "Post #{post.id}: images.attached? = #{post.images.attached?}, count = #{post.images.count}"
@@ -23,6 +33,57 @@ class PostsController < ApplicationController
         description: post.description,
         season: post.season,
         tags: post.tags.pluck(:name),
+        favorites_count: post.favorites_count,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        images: images
+      }
+    end
+
+    render json: posts_data
+  end
+
+  # GET /posts/popular
+  def popular
+    # 季節でフィルタリング（オプション）
+    @posts = Post.includes(:tags).popular
+    
+    if params[:season].present?
+      case params[:season]
+      when 'spring-summer'
+        @posts = @posts.where(season: ['spring-summer', 'spring', 'summer'])
+      when 'autumn-winter'
+        @posts = @posts.where(season: ['autumn-winter', 'autumn', 'winter'])
+      else
+        @posts = @posts.where(season: params[:season])
+      end
+    end
+
+    # 画像がある投稿のみ（オプション）
+    if params[:with_images] == 'true'
+      @posts = @posts.joins(:images_attachments).distinct
+    end
+
+    # 件数制限
+    limit = params[:limit] ? params[:limit].to_i : 10
+    @posts = @posts.limit(limit)
+
+    posts_data = @posts.map do |post|
+      images = if post.images.attached?
+        post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) }
+      else
+        []
+      end
+
+      {
+        id: post.id,
+        user_id: post.user_id,
+        title: post.title,
+        price: post.price,
+        description: post.description,
+        season: post.season,
+        tags: post.tags.pluck(:name),
+        favorites_count: post.favorites_count,
         created_at: post.created_at,
         updated_at: post.updated_at,
         images: images
@@ -36,7 +97,8 @@ class PostsController < ApplicationController
   def show
     render json: @post.as_json.merge(
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
-      tags: @post.tags.pluck(:name)
+      tags: @post.tags.pluck(:name),
+      favorites_count: @post.favorites_count
     )
   end
 
