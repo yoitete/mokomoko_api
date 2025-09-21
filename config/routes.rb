@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   get "/seasonal_campaigns/current" => "seasonal_campaigns#current"
   get "/seasonal_campaigns/current_secondary" => "seasonal_campaigns#current_secondary"
   get "/seasonal_campaigns/for_month/:month" => "seasonal_campaigns#for_month"
+  get "/seasonal_campaigns/active" => "seasonal_campaigns#active"
   get "/seasonal_campaigns" => "seasonal_campaigns#index"
   get "/seasonal_campaigns/:id" => "seasonal_campaigns#show"
   post "/seasonal_campaigns" => "seasonal_campaigns#create"

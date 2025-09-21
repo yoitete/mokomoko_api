@@ -21,16 +21,16 @@ class SeasonalCampaign < ApplicationRecord
     
     # 12月から2月の場合（年をまたぐ）
     if current_month == 12 || current_month <= 2
-      campaign = active.where(
+      campaign = active.primary.where(
         "(start_month = 12 AND end_month <= 2) OR (start_month <= ? AND end_month >= ?)",
         current_month, current_month
       ).first
       
       # 年をまたぐ特集がない場合、12月開始の特集を探す
-      campaign ||= active.where(start_month: 12).first if current_month == 12
-      campaign ||= active.where(end_month: 1..2).first if current_month <= 2
+      campaign ||= active.primary.where(start_month: 12).first if current_month == 12
+      campaign ||= active.primary.where(end_month: 1..2).first if current_month <= 2
     else
-      campaign = active.where("start_month <= ? AND end_month >= ?", current_month, current_month).first
+      campaign = active.primary.where("start_month <= ? AND end_month >= ?", current_month, current_month).first
     end
     
     campaign

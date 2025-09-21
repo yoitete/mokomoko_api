@@ -1,6 +1,6 @@
 class SeasonalCampaignsController < ApplicationController
   # 特集の表示は認証不要
-  skip_before_action :authenticate_user, only: [:current, :current_secondary, :index, :show]
+  skip_before_action :authenticate_user, only: [:current, :current_secondary, :active, :index, :show]
   
   before_action :set_seasonal_campaign, only: [:show, :update, :destroy]
   
@@ -47,6 +47,13 @@ class SeasonalCampaignsController < ApplicationController
   # 全ての特集を取得（管理用）
   def index
     campaigns = SeasonalCampaign.ordered
+    render json: campaigns
+  end
+  
+  # GET /seasonal_campaigns/active
+  # 有効な特集をすべて取得
+  def active
+    campaigns = SeasonalCampaign.active.ordered
     render json: campaigns
   end
   
