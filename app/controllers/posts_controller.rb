@@ -43,10 +43,39 @@ class PostsController < ApplicationController
     render json: posts_data
   end
 
+  # GET /posts/my
+  def my
+    @posts = Post.includes(:tags).where(user_id: @current_user.id).order(created_at: :desc)
+    
+    posts_data = @posts.map do |post|
+      images = if post.images.attached?
+        post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) }
+      else
+        []
+      end
+
+      {
+        id: post.id,
+        user_id: post.user_id,
+        title: post.title,
+        price: post.price,
+        description: post.description,
+        season: post.season,
+        tags: post.tags.pluck(:name),
+        favorites_count: post.favorites_count,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        images: images
+      }
+    end
+
+    render json: posts_data
+  end
+
   # GET /posts/popular
   def popular
-    # 季節でフィルタリング（オプション）
-    @posts = Post.includes(:tags).popular
+    # お気に入りが1件以上の投稿のみを対象
+    @posts = Post.includes(:tags).where('favorites_count > 0').popular
     
     if params[:season].present?
       case params[:season]
@@ -151,7 +180,8 @@ class PostsController < ApplicationController
   # DELETE /posts/1
   def destroy
     if @post.user_id == @current_user.id
-    @post.destroy!
+      @post.destroy!
+      render json: { message: "Post deleted successfully" }, status: :ok
     else
       render json: { error: "You are not authorized to delete this post" }, status: :unauthorized
     end

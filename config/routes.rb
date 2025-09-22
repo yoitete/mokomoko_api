@@ -11,9 +11,13 @@ Rails.application.routes.draw do
   put "/users/:id" => "users#update"
   patch "/users/:id" => "users#update"
   get "/posts" => "posts#index"
+  get "/posts/my" => "posts#my"
   get "/posts/popular" => "posts#popular"
   get "/posts/:id" => "posts#show"
   post "/posts" => "posts#create"
+  put "/posts/:id" => "posts#update"
+  patch "/posts/:id" => "posts#update"
+  delete "/posts/:id" => "posts#destroy"
 
   # お気に入り関連のルート
   get "/favorites" => "favorites#index"
