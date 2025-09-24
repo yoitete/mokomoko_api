@@ -6,6 +6,41 @@ class PostsController < ApplicationController
   def index
     @posts = Post.includes(:tags)
     
+    # 検索クエリによるフィルタリング
+    if params[:search].present?
+      search_query = params[:search].downcase.strip
+      # タグを含む投稿を検索
+      tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
+      # タイトル、説明、季節で検索
+      text_posts = @posts.where(
+        "LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(season) LIKE ?",
+        "%#{search_query}%", "%#{search_query}%", "%#{search_query}%"
+      )
+      # 両方の結果を結合
+      @posts = @posts.where(id: tag_posts.select(:id)).or(@posts.where(id: text_posts.select(:id)))
+    end
+
+    # 季節フィルター
+    if params[:season].present?
+      case params[:season]
+      when 'spring'
+        @posts = @posts.where(season: ['spring-summer', 'spring'])
+      when 'summer'
+        @posts = @posts.where(season: ['spring-summer', 'summer'])
+      when 'autumn'
+        @posts = @posts.where(season: ['autumn-winter', 'autumn'])
+      when 'winter'
+        @posts = @posts.where(season: ['autumn-winter', 'winter'])
+      else
+        @posts = @posts.where(season: params[:season])
+      end
+    end
+
+    # 画像がある投稿のみフィルタリング（オプション）
+    if params[:with_images] == 'true'
+      @posts = @posts.joins(:images_attachments).distinct
+    end
+    
     # ソートパラメータに応じて並び替え
     case params[:sort]
     when 'popular'
@@ -15,6 +50,11 @@ class PostsController < ApplicationController
     else
       @posts = @posts.order(created_at: :desc) # デフォルトは新着順
     end
+
+    # ページネーション
+    page = params[:page]&.to_i || 1
+    per_page = params[:per_page]&.to_i || 6
+    @posts = @posts.offset((page - 1) * per_page).limit(per_page)
 
     posts_data = @posts.map do |post|
       Rails.logger.info "Post #{post.id}: images.attached? = #{post.images.attached?}, count = #{post.images.count}"
@@ -40,7 +80,47 @@ class PostsController < ApplicationController
       }
     end
 
-    render json: posts_data
+    # 総件数を取得（ページネーション前）
+    total_count = Post.includes(:tags)
+    if params[:search].present?
+      search_query = params[:search].downcase.strip
+      # タグを含む投稿を検索
+      tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
+      # タイトル、説明、季節で検索
+      text_posts = total_count.where(
+        "LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(season) LIKE ?",
+        "%#{search_query}%", "%#{search_query}%", "%#{search_query}%"
+      )
+      # 両方の結果を結合
+      total_count = total_count.where(id: tag_posts.select(:id)).or(total_count.where(id: text_posts.select(:id)))
+    end
+    if params[:season].present?
+      case params[:season]
+      when 'spring'
+        total_count = total_count.where(season: ['spring-summer', 'spring'])
+      when 'summer'
+        total_count = total_count.where(season: ['spring-summer', 'summer'])
+      when 'autumn'
+        total_count = total_count.where(season: ['autumn-winter', 'autumn'])
+      when 'winter'
+        total_count = total_count.where(season: ['autumn-winter', 'winter'])
+      else
+        total_count = total_count.where(season: params[:season])
+      end
+    end
+    if params[:with_images] == 'true'
+      total_count = total_count.joins(:images_attachments).distinct
+    end
+
+    render json: {
+      posts: posts_data,
+      pagination: {
+        current_page: page,
+        per_page: per_page,
+        total_count: total_count.count,
+        total_pages: (total_count.count.to_f / per_page).ceil
+      }
+    }
   end
 
   # GET /posts/my
