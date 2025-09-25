@@ -236,10 +236,15 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1
   def update
+    # 投稿の所有者のみ編集可能
+    if @post.user_id != @current_user.id
+      render json: { error: "You are not authorized to edit this post" }, status: :unauthorized
+      return
+    end
+
     if @post.update(post_params.except(:tags))
       # 既存のタグを削除
       @post.tags.destroy_all
-      @post.user_id = @current_user.id
       # 新しいタグを作成（重複を避ける）
       if params[:post][:tags].present?
         unique_tags = params[:post][:tags].uniq.reject(&:blank?).map(&:strip)
