@@ -127,6 +127,11 @@ class PostsController < ApplicationController
   def my
     @posts = Post.includes(:tags).where(user_id: @current_user.id).order(created_at: :desc)
     
+    # ページネーション
+    page = params[:page]&.to_i || 1
+    per_page = params[:per_page]&.to_i || 5
+    @posts = @posts.offset((page - 1) * per_page).limit(per_page)
+    
     posts_data = @posts.map do |post|
       images = if post.images.attached?
         post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) }
@@ -149,7 +154,18 @@ class PostsController < ApplicationController
       }
     end
 
-    render json: posts_data
+    # 総件数を取得（ページネーション前）
+    total_count = Post.where(user_id: @current_user.id).count
+
+    render json: {
+      posts: posts_data,
+      pagination: {
+        current_page: page,
+        per_page: per_page,
+        total_count: total_count,
+        total_pages: (total_count.to_f / per_page).ceil
+      }
+    }
   end
 
   # GET /posts/popular
