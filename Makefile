@@ -37,3 +37,18 @@ rubocop:
 .PHONY: rubocop-fix
 rubocop-fix:
 	docker compose run --rm api bundle exec rubocop -A
+
+# RSpecテストを実行(基本これを使っていく予定)
+.PHONY: test
+test:
+	docker compose run --rm -e RAILS_ENV=test -e MYSQL_USER=root -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=database_test -e MYSQL_DATABASE_TEST=database_test -e MYSQL_HOST=db -e MYSQL_PORT=3306 api bash -c "bin/rails db:environment:set RAILS_ENV=test && bin/rails db:test:prepare && bundle exec rspec"
+
+# テストデータベースを準備
+.PHONY: test-prepare
+test-prepare:
+	docker compose run --rm -e RAILS_ENV=test -e MYSQL_USER=root -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=database_test -e MYSQL_DATABASE_TEST=database_test -e MYSQL_HOST=db -e MYSQL_PORT=3306 api bash -c "bin/rails db:environment:set RAILS_ENV=test && bin/rails db:test:prepare"
+
+# RSpecテストのみ実行（データベース準備済みの場合）
+.PHONY: test-only
+test-only:
+	docker compose run --rm -e RAILS_ENV=test -e MYSQL_USER=root -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=database_test -e MYSQL_DATABASE_TEST=database_test -e MYSQL_HOST=db -e MYSQL_PORT=3306 api bundle exec rspec
