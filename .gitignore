@@ -20,8 +20,6 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-/bin/
-
 /log
 /mysql
 /tmp
