@@ -16,7 +16,7 @@ class CreateSeasonalCampaigns < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :seasonal_campaigns, [:start_month, :end_month]
+    add_index :seasonal_campaigns, [ :start_month, :end_month ]
     add_index :seasonal_campaigns, :active
   end
 end

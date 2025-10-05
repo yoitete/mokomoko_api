@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   post "/favorites" => "favorites#create"
   delete "/favorites" => "favorites#destroy"
   get "/favorites/check" => "favorites#check"
-  
+
   # 季節特集関連のルート
   get "/seasonal_campaigns/current" => "seasonal_campaigns#current"
   get "/seasonal_campaigns/current_secondary" => "seasonal_campaigns#current_secondary"

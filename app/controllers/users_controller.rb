@@ -53,16 +53,16 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   def update
     @user = User.find(params[:id])
-    
+
     # パラメータの種類に応じて適切なパラメータを使用
     update_params = if params[:profile].present?
                       profile_params
-                    elsif params[:user].present?
+    elsif params[:user].present?
                       user_info_params
-                    else
+    else
                       {}
-                    end
-    
+    end
+
     if @user.update(update_params)
       render json: @user
     else
