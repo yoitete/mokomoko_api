@@ -7,7 +7,7 @@ RSpec.describe "Application", type: :request do
       expect(response).to have_http_status(:ok)
     end
   end
-  
+
   describe "GET /posts" do
     it "returns a successful response" do
       get "/posts"

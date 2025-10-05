@@ -138,9 +138,9 @@ primary_campaigns_data.each do |campaign_data|
     start_month: campaign_data[:start_month],
     end_month: campaign_data[:end_month]
   )
-  
+
   campaign.assign_attributes(campaign_data)
-  
+
   if campaign.save
     puts "✓ Created/Updated Primary: #{campaign.name} (#{campaign.start_month}月〜#{campaign.end_month}月)"
   else
@@ -156,9 +156,9 @@ secondary_campaigns_data.each do |campaign_data|
     start_month: campaign_data[:start_month],
     end_month: campaign_data[:end_month]
   )
-  
+
   campaign.assign_attributes(campaign_data)
-  
+
   if campaign.save
     puts "✓ Created/Updated Secondary: #{campaign.name} (#{campaign.start_month}月〜#{campaign.end_month}月)"
   else

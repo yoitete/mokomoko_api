@@ -5,7 +5,7 @@ class PostsController < ApplicationController
   # GET /posts
   def index
     @posts = Post.includes(:tags)
-    
+
     # 検索クエリによるフィルタリング
     if params[:search].present?
       search_query = params[:search].downcase.strip
@@ -23,29 +23,29 @@ class PostsController < ApplicationController
     # 季節フィルター
     if params[:season].present?
       case params[:season]
-      when 'spring'
-        @posts = @posts.where(season: ['spring-summer', 'spring'])
-      when 'summer'
-        @posts = @posts.where(season: ['spring-summer', 'summer'])
-      when 'autumn'
-        @posts = @posts.where(season: ['autumn-winter', 'autumn'])
-      when 'winter'
-        @posts = @posts.where(season: ['autumn-winter', 'winter'])
+      when "spring"
+        @posts = @posts.where(season: [ "spring-summer", "spring" ])
+      when "summer"
+        @posts = @posts.where(season: [ "spring-summer", "summer" ])
+      when "autumn"
+        @posts = @posts.where(season: [ "autumn-winter", "autumn" ])
+      when "winter"
+        @posts = @posts.where(season: [ "autumn-winter", "winter" ])
       else
         @posts = @posts.where(season: params[:season])
       end
     end
 
     # 画像がある投稿のみフィルタリング（オプション）
-    if params[:with_images] == 'true'
+    if params[:with_images] == "true"
       @posts = @posts.joins(:images_attachments).distinct
     end
-    
+
     # ソートパラメータに応じて並び替え
     case params[:sort]
-    when 'popular'
+    when "popular"
       @posts = @posts.popular
-    when 'newest'
+    when "newest"
       @posts = @posts.order(created_at: :desc)
     else
       @posts = @posts.order(created_at: :desc) # デフォルトは新着順
@@ -96,19 +96,19 @@ class PostsController < ApplicationController
     end
     if params[:season].present?
       case params[:season]
-      when 'spring'
-        total_count = total_count.where(season: ['spring-summer', 'spring'])
-      when 'summer'
-        total_count = total_count.where(season: ['spring-summer', 'summer'])
-      when 'autumn'
-        total_count = total_count.where(season: ['autumn-winter', 'autumn'])
-      when 'winter'
-        total_count = total_count.where(season: ['autumn-winter', 'winter'])
+      when "spring"
+        total_count = total_count.where(season: [ "spring-summer", "spring" ])
+      when "summer"
+        total_count = total_count.where(season: [ "spring-summer", "summer" ])
+      when "autumn"
+        total_count = total_count.where(season: [ "autumn-winter", "autumn" ])
+      when "winter"
+        total_count = total_count.where(season: [ "autumn-winter", "winter" ])
       else
         total_count = total_count.where(season: params[:season])
       end
     end
-    if params[:with_images] == 'true'
+    if params[:with_images] == "true"
       total_count = total_count.joins(:images_attachments).distinct
     end
 
@@ -126,12 +126,12 @@ class PostsController < ApplicationController
   # GET /posts/my
   def my
     @posts = Post.includes(:tags).where(user_id: @current_user.id).order(created_at: :desc)
-    
+
     # ページネーション
     page = params[:page]&.to_i || 1
     per_page = params[:per_page]&.to_i || 5
     @posts = @posts.offset((page - 1) * per_page).limit(per_page)
-    
+
     posts_data = @posts.map do |post|
       images = if post.images.attached?
         post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) }
@@ -171,21 +171,21 @@ class PostsController < ApplicationController
   # GET /posts/popular
   def popular
     # お気に入りが1件以上の投稿のみを対象
-    @posts = Post.includes(:tags).where('favorites_count > 0').popular
-    
+    @posts = Post.includes(:tags).where("favorites_count > 0").popular
+
     if params[:season].present?
       case params[:season]
-      when 'spring-summer'
-        @posts = @posts.where(season: ['spring-summer', 'spring', 'summer'])
-      when 'autumn-winter'
-        @posts = @posts.where(season: ['autumn-winter', 'autumn', 'winter'])
+      when "spring-summer"
+        @posts = @posts.where(season: [ "spring-summer", "spring", "summer" ])
+      when "autumn-winter"
+        @posts = @posts.where(season: [ "autumn-winter", "autumn", "winter" ])
       else
         @posts = @posts.where(season: params[:season])
       end
     end
 
     # 画像がある投稿のみ（オプション）
-    if params[:with_images] == 'true'
+    if params[:with_images] == "true"
       @posts = @posts.joins(:images_attachments).distinct
     end
 
