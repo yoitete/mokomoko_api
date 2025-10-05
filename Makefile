@@ -52,3 +52,9 @@ test-prepare:
 .PHONY: test-only
 test-only:
 	docker compose run --rm -e RAILS_ENV=test -e MYSQL_USER=root -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=database_test -e MYSQL_DATABASE_TEST=database_test -e MYSQL_HOST=db -e MYSQL_PORT=3306 api bundle exec rspec
+
+# SSMセッションを開始
+.PHONY: ssm-session
+ssm-session:
+	chmod +x task-ssm-db.sh
+	./task-ssm-db.sh
