@@ -1,0 +1,109 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ecs-deploy-main
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ap-northeast-1
+  AWS_ACCOUNT_ID: "498548865289"
+  ECR_REPOSITORY: mokomoko_api
+  ECS_CLUSTER_NAME: mokomoko_cluster
+  ECS_SERVICE_NAME: mokomoko_service
+  ECS_TASK_FAMILY: mokomoko_task
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image tag (latest)
+        id: vars
+        run: |
+          echo "image_uri_latest=${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest" >> $GITHUB_OUTPUT
+
+      - name: Set Vars
+        id: set-vars
+        run: |
+          echo "ECR_REPOSITORY_URI=${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}" >> $GITHUB_OUTPUT
+
+      - name: Build image (docker CLI)
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            --no-cache \
+            -f Dockerfile \
+            -t latest \
+            .
+      - name: docker tag
+        run: |
+          docker tag latest ${{ steps.vars.outputs.image_uri_latest }}
+
+      - name: Push image (docker CLI)
+        run: |
+          docker push ${{ steps.vars.outputs.image_uri_latest }}
+
+      - name: Fetch current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "${{ env.ECS_TASK_FAMILY }}" \
+            --query 'taskDefinition' \
+            > taskdef.json
+
+      - name: Render new task definition (set image to latest tag)
+        run: |
+          cat taskdef.json \
+            | jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .revision, .status)' \
+            | jq --arg IMAGE "${{ steps.vars.outputs.image_uri_latest }}" '
+                .containerDefinitions = (.containerDefinitions | map(
+                  .image = $IMAGE
+                  | if .name == "migration" then
+                      .workingDirectory = "/api"
+                      | .command = ["/bin/bash","-c","cd /api && bundle exec rails db:migrate"]
+                      | .essential = false
+                    else . end
+                ))
+              ' \
+            > taskdef-rendered.json
+          echo "Rendered task definition:" && cat taskdef-rendered.json
+
+      - name: Register new task definition revision
+        id: register
+        run: |
+          NEW_TD=$(aws ecs register-task-definition --cli-input-json file://taskdef-rendered.json)
+          echo "$NEW_TD" > taskdef-register-out.json
+          NEW_TD_ARN=$(jq -r '.taskDefinition.taskDefinitionArn' taskdef-register-out.json)
+          echo "task_definition_arn=$NEW_TD_ARN" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service to new task definition
+        run: |
+          aws ecs update-service \
+            --cluster "${{ env.ECS_CLUSTER_NAME }}" \
+            --service "${{ env.ECS_SERVICE_NAME }}" \
+            --task-definition "${{ steps.register.outputs.task_definition_arn }}"
+
+      - name: Wait for service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${{ env.ECS_CLUSTER_NAME }}" \
+            --services "${{ env.ECS_SERVICE_NAME }}"
