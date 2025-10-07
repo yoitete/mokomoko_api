@@ -57,7 +57,10 @@ Rails.application.configure do
   config.hosts = [
     "api.moko-moko.link",     # Allow requests from API domain
     "moko-moko.link",         # Allow requests from main domain
-    /.*\.dkwmoj6vymm3b\.amplifyapp\.com/ # Allow requests from Amplify subdomains
+    /.*\.dkwmoj6vymm3b\.amplifyapp\.com/, # Allow requests from Amplify subdomains
+    /10\.\d+\.\d+\.\d+/,      # Allow requests from 10.0.0.0/8 (Fargate private IPs)
+    /172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+/, # Allow requests from 172.16.0.0/12
+    /192\.168\.\d+\.\d+/      # Allow requests from 192.168.0.0/16
   ]
   #
   # Skip DNS rebinding protection for the default health check endpoint.
