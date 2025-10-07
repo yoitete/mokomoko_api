@@ -55,9 +55,9 @@ Rails.application.configure do
 
   # Use S3 for Active Storage in production
   config.active_storage.service = :amazon
-  
+
   # Require AWS SDK for S3
-  require 'aws-sdk-s3'
+  require "aws-sdk-s3"
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts = [
