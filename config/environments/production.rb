@@ -58,7 +58,7 @@ Rails.application.configure do
 
   # Require AWS SDK for S3
   require "aws-sdk-s3"
-  
+
   # Set default URL options for Active Storage
   config.action_controller.default_url_options = { host: "api.moko-moko.link", protocol: "https" }
   Rails.application.routes.default_url_options = { host: "api.moko-moko.link", protocol: "https" }
