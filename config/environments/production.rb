@@ -53,6 +53,12 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  # Use S3 for Active Storage in production
+  config.active_storage.service = :amazon
+
+  # Require AWS SDK for S3
+  require "aws-sdk-s3"
+
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts = [
     "api.moko-moko.link",     # Allow requests from API domain
