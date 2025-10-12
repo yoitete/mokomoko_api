@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Posts API", type: :request do
   let(:user) { create(:user) }
   let(:valid_firebase_uid) { user.firebase_uid }
-  
+
   # モックJWTトークンを作成するヘルパー
   def create_mock_jwt_token(firebase_uid)
     payload = {
@@ -21,7 +21,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "returns all posts" do
       get "/posts"
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"]).to be_an(Array)
@@ -30,7 +30,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "supports pagination" do
       get "/posts", params: { page: 1, per_page: 2 }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"].length).to eq(2)
@@ -40,7 +40,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "filters by season" do
       get "/posts", params: { season: "spring" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"].length).to eq(1)
@@ -49,7 +49,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "supports search functionality" do
       get "/posts", params: { search: "Spring" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"].length).to eq(1)
@@ -59,9 +59,9 @@ RSpec.describe "Posts API", type: :request do
     it "supports sorting by popularity" do
       post1.update!(favorites_count: 5)
       post2.update!(favorites_count: 10)
-      
+
       get "/posts", params: { sort: "popular" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"][0]["favorites_count"]).to eq(10)
@@ -76,7 +76,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "returns only user's posts" do
       get "/posts/my", headers: { "Authorization" => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"].length).to eq(2)
@@ -84,10 +84,10 @@ RSpec.describe "Posts API", type: :request do
     end
 
     it "supports pagination" do
-      get "/posts/my", 
+      get "/posts/my",
           params: { page: 1, per_page: 1 },
           headers: { "Authorization" => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["posts"].length).to eq(1)
@@ -103,7 +103,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "returns only posts with favorites" do
       get "/posts/popular"
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response.length).to eq(2)
@@ -113,9 +113,9 @@ RSpec.describe "Posts API", type: :request do
     it "supports season filtering" do
       popular_post1.update!(season: "spring")
       popular_post2.update!(season: "summer")
-      
+
       get "/posts/popular", params: { season: "spring" }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response.length).to eq(1)
@@ -124,7 +124,7 @@ RSpec.describe "Posts API", type: :request do
 
     it "supports limit parameter" do
       get "/posts/popular", params: { limit: 1 }
-      
+
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response.length).to eq(1)
@@ -140,20 +140,20 @@ RSpec.describe "Posts API", type: :request do
           price: 1500,
           description: "This is a new post",
           season: "spring",
-          tags: ["test", "example"]
+          tags: [ "test", "example" ]
         }
       }
     end
 
     it "creates a new post" do
       expect {
-        post "/posts", 
+        post "/posts",
              params: valid_params,
              headers: { "Authorization" => "Bearer #{token}" }
       }.to change(Post, :count).by(1)
-      
+
       expect(response).to have_http_status(:created)
-      
+
       post = Post.last
       expect(post.title).to eq("New Post")
       expect(post.user_id).to eq(user.id)
@@ -162,11 +162,11 @@ RSpec.describe "Posts API", type: :request do
 
     it "validates required fields" do
       invalid_params = { post: { title: "" } }
-      
-      post "/posts", 
+
+      post "/posts",
            params: invalid_params,
            headers: { "Authorization" => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
@@ -177,16 +177,16 @@ RSpec.describe "Posts API", type: :request do
 
     it "updates the post" do
       put "/posts/#{post.id}",
-          params: { 
-            post: { 
+          params: {
+            post: {
               title: "Updated Title",
               description: "Updated description"
-            } 
+            }
           },
           headers: { "Authorization" => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
-      
+
       post.reload
       expect(post.title).to eq("Updated Title")
       expect(post.description).to eq("Updated description")
@@ -195,15 +195,15 @@ RSpec.describe "Posts API", type: :request do
     it "prevents updating other user's posts" do
       other_user = create(:user)
       other_post = create(:post, user: other_user)
-      
+
       put "/posts/#{other_post.id}",
-          params: { 
-            post: { 
+          params: {
+            post: {
               title: "Hacked Title"
-            } 
+            }
           },
           headers: { "Authorization" => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:unauthorized)
     end
   end
@@ -217,19 +217,19 @@ RSpec.describe "Posts API", type: :request do
         delete "/posts/#{post.id}",
                headers: { "Authorization" => "Bearer #{token}" }
       }.to change(Post, :count).by(-1)
-      
+
       expect(response).to have_http_status(:ok)
     end
 
     it "prevents deleting other user's posts" do
       other_user = create(:user)
       other_post = create(:post, user: other_user)
-      
+
       expect {
         delete "/posts/#{other_post.id}",
                headers: { "Authorization" => "Bearer #{token}" }
       }.not_to change(Post, :count)
-      
+
       expect(response).to have_http_status(:unauthorized)
     end
   end

@@ -6,20 +6,20 @@ class UsersController < ApplicationController
   def index
     @users = User.all
 
-    render json: @users.as_json(except: [:created_at, :updated_at])
+    render json: @users.as_json(except: [ :created_at, :updated_at ])
   end
 
   # GET /users/1
   def show
     @user = User.find(params[:id])
-    render json: @user.as_json(except: [:created_at, :updated_at])
+    render json: @user.as_json(except: [ :created_at, :updated_at ])
   end
 
   # GET /users/by_firebase_uid/:firebase_uid
   def show_by_firebase_uid
     @user = User.find_by(firebase_uid: params[:firebase_uid])
     if @user
-      render json: @user.as_json(except: [:created_at, :updated_at])
+      render json: @user.as_json(except: [ :created_at, :updated_at ])
     else
       render json: { error: "User not found" }, status: :not_found
     end
@@ -42,7 +42,7 @@ class UsersController < ApplicationController
         if payload["iss"] == "https://securetoken.google.com/mokomoko-2ac26"
           @user.firebase_uid = payload["user_id"]
           if @user.save
-            render json: @user.as_json(except: [:created_at, :updated_at]), status: :created
+            render json: @user.as_json(except: [ :created_at, :updated_at ]), status: :created
             return
           else
             render json: @user.errors, status: :unprocessable_entity
@@ -71,7 +71,7 @@ class UsersController < ApplicationController
     end
 
     if @user.update(update_params)
-      render json: @user.as_json(except: [:created_at, :updated_at])
+      render json: @user.as_json(except: [ :created_at, :updated_at ])
     else
       render json: @user.errors, status: :unprocessable_entity
     end

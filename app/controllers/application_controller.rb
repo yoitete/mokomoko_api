@@ -7,7 +7,7 @@ class ApplicationController < ActionController::API
     def authenticate_user
       # リクエストヘッダーからJWTトークンを取得
       token = request.headers["Authorization"]&.sub(/^Bearer /, "")
-      
+
       Rails.logger.info "Authentication attempt:"
       Rails.logger.info "  - Authorization header present: #{request.headers['Authorization'].present?}"
       Rails.logger.info "  - Token present: #{token.present?}"
@@ -20,13 +20,13 @@ class ApplicationController < ActionController::API
           Rails.logger.info "  - JWT payload decoded successfully"
           Rails.logger.info "  - Issuer: #{payload['iss']}"
           Rails.logger.info "  - User ID: #{payload['user_id']}"
-          
+
           if payload["iss"] == "https://securetoken.google.com/mokomoko-2ac26"
             # ユーザーIDからユーザーを取得
             user = User.find_by(firebase_uid: payload["user_id"])
             Rails.logger.info "  - User found: #{user.present?}"
             Rails.logger.info "  - User ID: #{user&.id}"
-            
+
             # ユーザーが存在しているかどうか確認する
             if user.present?
               # ユーザーが存在していれば@current_userに代入する
