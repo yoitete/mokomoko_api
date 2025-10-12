@@ -32,7 +32,7 @@ RSpec.describe Post, type: :model do
     it "belongs to user" do
       user = create(:user)
       post = create(:post, user: user)
-      
+
       expect(post.user).to eq(user)
     end
 
@@ -40,7 +40,7 @@ RSpec.describe Post, type: :model do
       post = create(:post)
       tag1 = create(:tag, post: post, name: "tag1")
       tag2 = create(:tag, post: post, name: "tag2")
-      
+
       expect(post.tags).to include(tag1, tag2)
     end
 
@@ -50,14 +50,14 @@ RSpec.describe Post, type: :model do
       user2 = create(:user)
       favorite1 = create(:favorite, post: post, user: user1)
       favorite2 = create(:favorite, post: post, user: user2)
-      
+
       expect(post.favorites).to include(favorite1, favorite2)
     end
 
     it "destroys associated tags when post is destroyed" do
       post = create(:post)
       tag = create(:tag, post: post)
-      
+
       expect { post.destroy }.to change(Tag, :count).by(-1)
     end
 
@@ -65,7 +65,7 @@ RSpec.describe Post, type: :model do
       post = create(:post)
       user = create(:user)
       favorite = create(:favorite, post: post, user: user)
-      
+
       expect { post.destroy }.to change(Favorite, :count).by(-1)
     end
   end
