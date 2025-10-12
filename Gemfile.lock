@@ -109,6 +109,11 @@ GEM
     drb (2.2.3)
     erb (5.0.2)
     erubi (1.13.1)
+    factory_bot (6.5.5)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.5.1)
+      factory_bot (~> 6.5)
+      railties (>= 6.1.0)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-x86_64-linux-gnu)
     globalid (1.2.1)
@@ -295,6 +300,7 @@ DEPENDENCIES
   aws-sdk-s3
   bootsnap
   debug
+  factory_bot_rails (~> 6.5)
   image_processing (>= 1.2)
   jwt (~> 3.0)
   mysql2 (~> 0.5)

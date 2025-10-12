@@ -43,3 +43,5 @@ group :development, :test do
 end
 
 # https://railsguides.jp/active_storage_overview.html
+
+gem "factory_bot_rails", "~> 6.5", groups: [:development, :test]
