@@ -26,6 +26,11 @@ RSpec.describe Post, type: :model do
       post = build(:post, price: -100)
       expect(post).not_to be_valid
     end
+
+    it "is valid without season (category is optional)" do
+      post = build(:post, season: nil)
+      expect(post).to be_valid
+    end
   end
 
   describe "associations" do

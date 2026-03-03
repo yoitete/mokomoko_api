@@ -38,15 +38,6 @@ RSpec.describe "Posts API", type: :request do
       expect(json_response["pagination"]["per_page"]).to eq(2)
     end
 
-    it "filters by season" do
-      get "/posts", params: { season: "spring" }
-
-      expect(response).to have_http_status(:ok)
-      json_response = JSON.parse(response.body)
-      expect(json_response["posts"].length).to eq(1)
-      expect(json_response["posts"][0]["season"]).to eq("spring")
-    end
-
     it "supports search functionality" do
       get "/posts", params: { search: "Spring" }
 
@@ -110,18 +101,6 @@ RSpec.describe "Posts API", type: :request do
       expect(json_response.map { |p| p["title"] }).to contain_exactly("Very Popular", "Somewhat Popular")
     end
 
-    it "supports season filtering" do
-      popular_post1.update!(season: "spring")
-      popular_post2.update!(season: "summer")
-
-      get "/posts/popular", params: { season: "spring" }
-
-      expect(response).to have_http_status(:ok)
-      json_response = JSON.parse(response.body)
-      expect(json_response.length).to eq(1)
-      expect(json_response[0]["season"]).to eq("spring")
-    end
-
     it "supports limit parameter" do
       get "/posts/popular", params: { limit: 1 }
 
@@ -139,7 +118,6 @@ RSpec.describe "Posts API", type: :request do
           title: "New Post",
           price: 1500,
           description: "This is a new post",
-          season: "spring",
           tags: [ "test", "example" ]
         }
       }
