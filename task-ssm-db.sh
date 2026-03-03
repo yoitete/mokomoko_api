@@ -36,4 +36,4 @@ echo "command + C で終了します"
 aws ssm start-session \
     --target ecs:mokomoko_cluster_${TASK_ID}_${CONTAINER_RUNTIME_ID} \
     --document-name AWS-StartPortForwardingSessionToRemoteHost \
-    --parameters "{\"host\":[\"mokomoko-rds.cvu288qmotse.ap-northeast-1.rds.amazonaws.com\"],\"portNumber\":[\"3306\"],\"localPortNumber\":[\"13306\"]}"
+    --parameters "{\"host\":[\"mokomoko-db.cvu288qmotse.ap-northeast-1.rds.amazonaws.com\"],\"portNumber\":[\"3306\"],\"localPortNumber\":[\"13306\"]}"
