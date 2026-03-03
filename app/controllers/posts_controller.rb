@@ -11,29 +11,13 @@ class PostsController < ApplicationController
       search_query = params[:search].downcase.strip
       # タグを含む投稿を検索
       tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
-      # タイトル、説明、季節で検索
+      # タイトル・説明で検索
       text_posts = @posts.where(
-        "LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(season) LIKE ?",
-        "%#{search_query}%", "%#{search_query}%", "%#{search_query}%"
+        "LOWER(title) LIKE ? OR LOWER(description) LIKE ?",
+        "%#{search_query}%", "%#{search_query}%"
       )
       # 両方の結果を結合
       @posts = @posts.where(id: tag_posts.select(:id)).or(@posts.where(id: text_posts.select(:id)))
-    end
-
-    # 季節フィルター
-    if params[:season].present?
-      case params[:season]
-      when "spring"
-        @posts = @posts.where(season: [ "spring-summer", "spring" ])
-      when "summer"
-        @posts = @posts.where(season: [ "spring-summer", "summer" ])
-      when "autumn"
-        @posts = @posts.where(season: [ "autumn-winter", "autumn" ])
-      when "winter"
-        @posts = @posts.where(season: [ "autumn-winter", "winter" ])
-      else
-        @posts = @posts.where(season: params[:season])
-      end
     end
 
     # 画像がある投稿のみフィルタリング（オプション）
@@ -71,7 +55,6 @@ class PostsController < ApplicationController
         title: post.title,
         price: post.price,
         description: post.description,
-        season: post.season,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
         created_at: post.created_at,
@@ -84,29 +67,12 @@ class PostsController < ApplicationController
     total_count = Post.includes(:tags)
     if params[:search].present?
       search_query = params[:search].downcase.strip
-      # タグを含む投稿を検索
       tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
-      # タイトル、説明、季節で検索
       text_posts = total_count.where(
-        "LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(season) LIKE ?",
-        "%#{search_query}%", "%#{search_query}%", "%#{search_query}%"
+        "LOWER(title) LIKE ? OR LOWER(description) LIKE ?",
+        "%#{search_query}%", "%#{search_query}%"
       )
-      # 両方の結果を結合
       total_count = total_count.where(id: tag_posts.select(:id)).or(total_count.where(id: text_posts.select(:id)))
-    end
-    if params[:season].present?
-      case params[:season]
-      when "spring"
-        total_count = total_count.where(season: [ "spring-summer", "spring" ])
-      when "summer"
-        total_count = total_count.where(season: [ "spring-summer", "summer" ])
-      when "autumn"
-        total_count = total_count.where(season: [ "autumn-winter", "autumn" ])
-      when "winter"
-        total_count = total_count.where(season: [ "autumn-winter", "winter" ])
-      else
-        total_count = total_count.where(season: params[:season])
-      end
     end
     if params[:with_images] == "true"
       total_count = total_count.joins(:images_attachments).distinct
@@ -145,7 +111,6 @@ class PostsController < ApplicationController
         title: post.title,
         price: post.price,
         description: post.description,
-        season: post.season,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
         created_at: post.created_at,
@@ -154,7 +119,6 @@ class PostsController < ApplicationController
       }
     end
 
-    # 総件数を取得（ページネーション前）
     total_count = Post.where(user_id: @current_user.id).count
 
     render json: {
@@ -172,17 +136,6 @@ class PostsController < ApplicationController
   def popular
     # お気に入りが1件以上の投稿のみを対象
     @posts = Post.includes(:tags).where("favorites_count > 0").popular
-
-    if params[:season].present?
-      case params[:season]
-      when "spring-summer"
-        @posts = @posts.where(season: [ "spring-summer", "spring", "summer" ])
-      when "autumn-winter"
-        @posts = @posts.where(season: [ "autumn-winter", "autumn", "winter" ])
-      else
-        @posts = @posts.where(season: params[:season])
-      end
-    end
 
     # 画像がある投稿のみ（オプション）
     if params[:with_images] == "true"
@@ -206,7 +159,6 @@ class PostsController < ApplicationController
         title: post.title,
         price: post.price,
         description: post.description,
-        season: post.season,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
         created_at: post.created_at,
@@ -220,7 +172,7 @@ class PostsController < ApplicationController
 
   # GET /posts/1
   def show
-    render json: @post.as_json.merge(
+    render json: @post.as_json.except("season").merge(
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
       tags: @post.tags.pluck(:name),
       favorites_count: @post.favorites_count
@@ -296,6 +248,6 @@ class PostsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def post_params
-      params.expect(post: [ :title, :price, :description, :season, :tags, images: [] ])
+      params.expect(post: [ :title, :price, :description, :tags, images: [] ])
     end
 end

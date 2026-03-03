@@ -134,8 +134,7 @@ RSpec.describe "Authentication", type: :request do
               post: {
                 title: "New Post",
                 price: 1000,
-                description: "Test description",
-                season: "spring"
+                description: "Test description"
               }
             },
             headers: { "Authorization" => "Bearer #{token}" }
@@ -155,8 +154,7 @@ RSpec.describe "Authentication", type: :request do
           post: {
             title: "New Post",
             price: 1000,
-            description: "Test description",
-            season: "spring"
+            description: "Test description"
           }
         }
 
