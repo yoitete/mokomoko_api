@@ -4,7 +4,7 @@ class PostsController < ApplicationController
 
   # GET /posts
   def index
-    @posts = Post.includes(:tags)
+    @posts = Post.includes(:tags, :user)
 
     # 検索クエリによるフィルタリング
     if params[:search].present?
@@ -59,7 +59,8 @@ class PostsController < ApplicationController
         favorites_count: post.favorites_count,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        images: images
+        images: images,
+        user_name: post.user&.name
       }
     end
 
@@ -91,7 +92,7 @@ class PostsController < ApplicationController
 
   # GET /posts/my
   def my
-    @posts = Post.includes(:tags).where(user_id: @current_user.id).order(created_at: :desc)
+    @posts = Post.includes(:tags, :user).where(user_id: @current_user.id).order(created_at: :desc)
 
     # ページネーション
     page = params[:page]&.to_i || 1
@@ -115,7 +116,8 @@ class PostsController < ApplicationController
         favorites_count: post.favorites_count,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        images: images
+        images: images,
+        user_name: post.user&.name
       }
     end
 
@@ -135,7 +137,7 @@ class PostsController < ApplicationController
   # GET /posts/popular
   def popular
     # お気に入りが1件以上の投稿のみを対象
-    @posts = Post.includes(:tags).where("favorites_count > 0").popular
+    @posts = Post.includes(:tags, :user).where("favorites_count > 0").popular
 
     # 画像がある投稿のみ（オプション）
     if params[:with_images] == "true"
@@ -163,7 +165,8 @@ class PostsController < ApplicationController
         favorites_count: post.favorites_count,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        images: images
+        images: images,
+        user_name: post.user&.name
       }
     end
 
@@ -175,7 +178,8 @@ class PostsController < ApplicationController
     render json: @post.as_json.except("season").merge(
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
       tags: @post.tags.pluck(:name),
-      favorites_count: @post.favorites_count
+      favorites_count: @post.favorites_count,
+      user_name: @post.user&.name
     )
   end
 
