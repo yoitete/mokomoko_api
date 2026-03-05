@@ -58,6 +58,10 @@ class PostsController < ApplicationController
         description: post.description,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
+        material: post.material,
+        sleeping_position: post.sleeping_position,
+        height: post.height,
+        order_type: post.order_type,
         created_at: post.created_at,
         updated_at: post.updated_at,
         images: images
@@ -114,6 +118,10 @@ class PostsController < ApplicationController
         description: post.description,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
+        material: post.material,
+        sleeping_position: post.sleeping_position,
+        height: post.height,
+        order_type: post.order_type,
         created_at: post.created_at,
         updated_at: post.updated_at,
         images: images
@@ -163,6 +171,10 @@ class PostsController < ApplicationController
         description: post.description,
         tags: post.tags.pluck(:name),
         favorites_count: post.favorites_count,
+        material: post.material,
+        sleeping_position: post.sleeping_position,
+        height: post.height,
+        order_type: post.order_type,
         created_at: post.created_at,
         updated_at: post.updated_at,
         images: images
@@ -251,6 +263,6 @@ class PostsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def post_params
-      params.expect(post: [ :title, :price, :description, :tags, images: [] ])
+      params.expect(post: [ :title, :price, :description, :material, :sleeping_position, :height, :order_type, :tags, images: [] ])
     end
 end
