@@ -4,7 +4,7 @@ class PostsController < ApplicationController
 
   # GET /posts
   def index
-    @posts = Post.includes(:tags)
+    @posts = Post.includes(:tags, :user)
 
     # 検索クエリによるフィルタリング
     if params[:search].present?
@@ -52,6 +52,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
+        user_name: post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -135,7 +136,7 @@ class PostsController < ApplicationController
   # GET /posts/popular
   def popular
     # お気に入りが1件以上の投稿のみを対象
-    @posts = Post.includes(:tags).where("favorites_count > 0").popular
+    @posts = Post.includes(:tags, :user).where("favorites_count > 0").popular
 
     # 画像がある投稿のみ（オプション）
     if params[:with_images] == "true"
@@ -156,6 +157,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
+        user_name: post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -173,6 +175,7 @@ class PostsController < ApplicationController
   # GET /posts/1
   def show
     render json: @post.as_json.except("season").merge(
+      user_name: @post.user&.name,
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
       tags: @post.tags.pluck(:name),
       favorites_count: @post.favorites_count
