@@ -25,6 +25,10 @@ Rails.application.routes.draw do
   delete "/favorites" => "favorites#destroy"
   get "/favorites/check" => "favorites#check"
 
+  # 枕診断関連のルート
+  get "/pillow_diagnoses" => "pillow_diagnoses#index"
+  post "/pillow_diagnoses" => "pillow_diagnoses#create"
+  delete "/pillow_diagnoses/:id" => "pillow_diagnoses#destroy"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
