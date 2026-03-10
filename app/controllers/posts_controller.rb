@@ -6,6 +6,11 @@ class PostsController < ApplicationController
   def index
     @posts = Post.includes(:tags, :user)
 
+    # ユーザーIDによるフィルタリング
+    if params[:user_id].present?
+      @posts = @posts.where(user_id: params[:user_id])
+    end
+
     # 検索クエリによるフィルタリング
     if params[:search].present?
       search_query = params[:search].downcase.strip
@@ -52,7 +57,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
-        user_name: post.user&.name,
+        user_name: post.user&.nickname.presence || post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -70,6 +75,9 @@ class PostsController < ApplicationController
 
     # 総件数を取得（ページネーション前）
     total_count = Post.includes(:tags)
+    if params[:user_id].present?
+      total_count = total_count.where(user_id: params[:user_id])
+    end
     if params[:search].present?
       search_query = params[:search].downcase.strip
       tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
@@ -165,7 +173,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
-        user_name: post.user&.name,
+        user_name: post.user&.nickname.presence || post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -187,7 +195,7 @@ class PostsController < ApplicationController
   # GET /posts/1
   def show
     render json: @post.as_json.except("season").merge(
-      user_name: @post.user&.name,
+      user_name: @post.user&.nickname.presence || @post.user&.name,
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
       tags: @post.tags.pluck(:name),
       favorites_count: @post.favorites_count

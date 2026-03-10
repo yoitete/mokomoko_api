@@ -25,6 +25,18 @@ Rails.application.routes.draw do
   delete "/favorites" => "favorites#destroy"
   get "/favorites/check" => "favorites#check"
 
+  # コメント関連のルート
+  get "/comments" => "comments#index"
+  post "/comments" => "comments#create"
+  delete "/comments/:id" => "comments#destroy"
+
+  # フォロー関連のルート
+  post "/relationships" => "relationships#create"
+  delete "/relationships" => "relationships#destroy"
+  get "/relationships/check" => "relationships#check"
+  get "/relationships/followers" => "relationships#followers"
+  get "/relationships/following" => "relationships#following"
+
   # 枕診断関連のルート
   get "/pillow_diagnoses" => "pillow_diagnoses#index"
   post "/pillow_diagnoses" => "pillow_diagnoses#create"

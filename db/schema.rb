@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_09_010000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_10_063043) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_09_010000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "comments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "post_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
+    t.index ["post_id"], name: "index_comments_on_post_id"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "favorites", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -76,6 +87,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_09_010000) do
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
+  create_table "relationships", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "follower_id", null: false
+    t.bigint "following_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follower_id", "following_id"], name: "index_relationships_on_follower_id_and_following_id", unique: true
+    t.index ["follower_id"], name: "index_relationships_on_follower_id"
+    t.index ["following_id"], name: "index_relationships_on_following_id"
+  end
+
   create_table "tags", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "post_id", null: false
     t.string "name"
@@ -93,13 +114,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_09_010000) do
     t.text "bio"
     t.string "profile_image"
     t.string "selected_icon"
+    t.integer "followers_count", default: 0, null: false
+    t.integer "following_count", default: 0, null: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "comments", "posts"
+  add_foreign_key "comments", "users"
   add_foreign_key "favorites", "posts"
   add_foreign_key "favorites", "users"
   add_foreign_key "pillow_diagnoses", "users"
   add_foreign_key "posts", "users"
+  add_foreign_key "relationships", "users", column: "follower_id"
+  add_foreign_key "relationships", "users", column: "following_id"
   add_foreign_key "tags", "posts"
 end
