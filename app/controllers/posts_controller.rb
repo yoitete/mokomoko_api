@@ -6,6 +6,11 @@ class PostsController < ApplicationController
   def index
     @posts = Post.includes(:tags, :user)
 
+    # ユーザーIDによるフィルタリング
+    if params[:user_id].present?
+      @posts = @posts.where(user_id: params[:user_id])
+    end
+
     # 検索クエリによるフィルタリング
     if params[:search].present?
       search_query = params[:search].downcase.strip
@@ -70,6 +75,9 @@ class PostsController < ApplicationController
 
     # 総件数を取得（ページネーション前）
     total_count = Post.includes(:tags)
+    if params[:user_id].present?
+      total_count = total_count.where(user_id: params[:user_id])
+    end
     if params[:search].present?
       search_query = params[:search].downcase.strip
       tag_posts = Post.joins(:tags).where("LOWER(tags.name) LIKE ?", "%#{search_query}%")
