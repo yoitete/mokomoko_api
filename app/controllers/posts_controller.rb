@@ -57,7 +57,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
-        user_name: post.user&.name,
+        user_name: post.user&.nickname.presence || post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -173,7 +173,7 @@ class PostsController < ApplicationController
       {
         id: post.id,
         user_id: post.user_id,
-        user_name: post.user&.name,
+        user_name: post.user&.nickname.presence || post.user&.name,
         title: post.title,
         price: post.price,
         description: post.description,
@@ -195,7 +195,7 @@ class PostsController < ApplicationController
   # GET /posts/1
   def show
     render json: @post.as_json.except("season").merge(
-      user_name: @post.user&.name,
+      user_name: @post.user&.nickname.presence || @post.user&.name,
       images: @post.images.attached? ? @post.images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } : [],
       tags: @post.tags.pluck(:name),
       favorites_count: @post.favorites_count
