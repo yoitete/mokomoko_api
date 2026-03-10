@@ -26,6 +26,11 @@ class CommentsController < ApplicationController
 
   # POST /comments
   def create
+    post = Post.find_by(id: params[:post_id])
+    if post&.user_id == @current_user.id
+      return render json: { error: "自分の投稿にはコメントできません" }, status: :forbidden
+    end
+
     @comment = Comment.new(
       user_id: @current_user.id,
       post_id: params[:post_id],
