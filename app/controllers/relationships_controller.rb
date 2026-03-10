@@ -1,5 +1,5 @@
 class RelationshipsController < ApplicationController
-  skip_before_action :authenticate_user, only: [:followers, :following]
+  skip_before_action :authenticate_user, only: [ :followers, :following ]
 
   # POST /relationships
   def create
