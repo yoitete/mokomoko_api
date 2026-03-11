@@ -9,8 +9,6 @@ class Post < ApplicationRecord
   validates :title, presence: true
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :description, presence: true
-  # season（カテゴリー）は任意。未指定時は nil/空文字を許可
-
   # 人気順スコープ
   scope :popular, -> { order(favorites_count: :desc, created_at: :desc) }
 end

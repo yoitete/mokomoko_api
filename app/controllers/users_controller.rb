@@ -34,6 +34,7 @@ class UsersController < ApplicationController
     puts "name: #{user_params[:name]}"
     puts "--------------------------------"
     @user.name = user_params[:name]
+    @user.nickname = user_params[:nickname]
 
     # tokenが存在しているかどうか確認する(空のことがあるので)
     if token.present?
@@ -90,7 +91,7 @@ class UsersController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def user_params
-    params.permit(:name, :token)
+    params.permit(:name, :nickname, :token)
   end
 
   # Profile update parameters
