@@ -204,6 +204,12 @@ class PostsController < ApplicationController
 
   # POST /posts
   def create
+    # 画像枚数チェック（最大5枚）
+    if params[:post][:images].present? && params[:post][:images].length > 5
+      render json: { error: "画像は5枚までです" }, status: :unprocessable_entity
+      return
+    end
+
     @post = Post.new(post_params.except(:tags))
     @post.user_id = @current_user.id
 
@@ -233,7 +239,18 @@ class PostsController < ApplicationController
       return
     end
 
-    if @post.update(post_params.except(:tags))
+    # 画像は別途処理するため除外してupdate
+    if @post.update(post_params.except(:tags, :images))
+      # 新しい画像が送信された場合は追加（既存画像は保持、合計5枚まで）
+      if params[:post][:images].present?
+        new_count = @post.images.count + params[:post][:images].length
+        if new_count > 5
+          render json: { error: "画像は合計5枚までです" }, status: :unprocessable_entity
+          return
+        end
+        @post.images.attach(params[:post][:images])
+      end
+
       # 既存のタグを削除
       @post.tags.destroy_all
       # 新しいタグを作成（重複を避ける）
